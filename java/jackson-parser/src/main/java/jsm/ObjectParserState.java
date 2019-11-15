@@ -1,0 +1,5 @@
+package jsm;
+
+public enum ObjectParserState {
+    PARSE_START_OBJECT, PARSE_FIELD_NAME_OR_END_OBJECT, PARSE_FIELD_VALUE, FINISHED
+}
