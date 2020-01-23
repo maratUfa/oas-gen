@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.50"
+    `maven-publish`
 }
 
 allprojects {
@@ -47,4 +48,25 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
     systemProperty("testCasesDir", "$projectDir/src/test/test-cases")
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/fomin/schema-transformer")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("PASSWORD")
+            }
+        }
+    }
+    publications {
+        register<MavenPublication>("gpr") {
+            groupId = "com.github.fomin"
+            artifactId = "schema-transformer"
+            version = "0.0.1-SNAPSHOT"
+            from(components["java"])
+        }
+    }
 }
