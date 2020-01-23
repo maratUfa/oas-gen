@@ -12,10 +12,12 @@ public class Item {
 
     public final String property1;
     public final com.example.ItemProperty2 property2;
+    public final java.math.BigDecimal decimalProperty;
 
-    public Item(String property1, com.example.ItemProperty2 property2) {
+    public Item(String property1, com.example.ItemProperty2 property2, java.math.BigDecimal decimalProperty) {
         this.property1 = property1;
         this.property2 = property2;
+        this.decimalProperty = decimalProperty;
     }
 
     public static class Parser implements NonBlockingParser<com.example.Item> {
@@ -24,6 +26,7 @@ public class Item {
         private String currentField;
         private String p0; // property1
         private com.example.ItemProperty2 p1; // property2
+        private java.math.BigDecimal p2; // decimalProperty
         private com.example.ItemProperty2.Parser comExampleItemProperty2Parser;
 
         @Override
@@ -74,6 +77,13 @@ public class Item {
                                     objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
                                 }
                                 break;
+                            case "decimalProperty":
+                                if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
+                                    ParserUtils.assertToken(JsonToken.VALUE_STRING, token, jsonParser);
+                                    this.p2 = jsonParser.getDecimalValue();
+                                    objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
+                                }
+                                break;
                         }
                         break;
                 }
@@ -84,7 +94,7 @@ public class Item {
         @Override
         public com.example.Item build() {
             if (objectParserState == ObjectParserState.FINISHED) {
-                return new com.example.Item(this.p0, this.p1);
+                return new com.example.Item(this.p0, this.p1, this.p2);
             } else {
                 throw new IllegalStateException("Parsing is not completed");
             }
@@ -105,6 +115,10 @@ public class Item {
             if (value.property2 != null) {
                 jsonGenerator.writeFieldName("property2");
                 com.example.ItemProperty2.Writer.INSTANCE.write(jsonGenerator, value.property2);
+            }
+            if (value.decimalProperty != null) {
+                jsonGenerator.writeFieldName("decimalProperty");
+                jsonGenerator.writeNumber(value.decimalProperty);
             }
             jsonGenerator.writeEndObject();
         }

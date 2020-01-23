@@ -7,6 +7,7 @@ import jsm.TypedFragment
 fun toType(basePackage: String, schema: JsonSchema): String {
     return when (val jsonType = schema.type) {
         JsonType.STRING -> "String"
+        JsonType.NUMBER -> "java.math.BigDecimal"
         JsonType.BOOLEAN -> "Boolean"
         JsonType.ARRAY -> "List<${toType(basePackage, schema.items() ?: error("there is not items for schema $schema"))}>"
         JsonType.OBJECT -> toClassName(basePackage, schema)

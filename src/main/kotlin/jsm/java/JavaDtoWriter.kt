@@ -28,6 +28,7 @@ class JavaDtoWriter(
         return items.flatMap { jsonSchema ->
             when (val type = jsonSchema.type) {
                 JsonType.STRING -> emptyList()
+                JsonType.NUMBER -> emptyList()
                 JsonType.BOOLEAN -> emptyList()
                 JsonType.OBJECT -> writeObject(jsonSchema)
                 JsonType.ARRAY -> write(listOf(jsonSchema.items()

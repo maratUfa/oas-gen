@@ -49,3 +49,5 @@ components:
               type: string
             property22:
               type: string
+        decimalProperty:
+          type: number

@@ -1,7 +1,7 @@
 package jsm
 
 enum class JsonType(val scalar: Boolean) {
-    STRING(true), BOOLEAN(true), ARRAY(false), OBJECT(false),
+    STRING(true), NUMBER(true), BOOLEAN(true), ARRAY(false), OBJECT(false),
 }
 
 class JsonSchema(override val fragment: Fragment, override val parent: TypedFragment?) : TypedFragment() {

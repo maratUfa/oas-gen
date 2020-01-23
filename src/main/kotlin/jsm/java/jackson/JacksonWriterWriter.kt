@@ -6,7 +6,8 @@ import jsm.java.ExtraMemberWriter
 import jsm.java.JavaProperty
 
 val jacksonScalarWriteMethods = mapOf(
-        JsonType.STRING to "writeString"
+        JsonType.STRING to "writeString",
+        JsonType.NUMBER to "writeNumber"
 )
 
 class JacksonWriterWriter : ExtraMemberWriter {
