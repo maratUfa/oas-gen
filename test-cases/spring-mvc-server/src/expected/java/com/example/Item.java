@@ -13,11 +13,13 @@ public class Item {
     public final String property1;
     public final com.example.ItemProperty2 property2;
     public final java.math.BigDecimal decimalProperty;
+    public final java.time.LocalDateTime localDateTimeProperty;
 
-    public Item(String property1, com.example.ItemProperty2 property2, java.math.BigDecimal decimalProperty) {
+    public Item(String property1, com.example.ItemProperty2 property2, java.math.BigDecimal decimalProperty, java.time.LocalDateTime localDateTimeProperty) {
         this.property1 = property1;
         this.property2 = property2;
         this.decimalProperty = decimalProperty;
+        this.localDateTimeProperty = localDateTimeProperty;
     }
 
     public static class Parser implements NonBlockingParser<com.example.Item> {
@@ -27,6 +29,7 @@ public class Item {
         private String p0; // property1
         private com.example.ItemProperty2 p1; // property2
         private java.math.BigDecimal p2; // decimalProperty
+        private java.time.LocalDateTime p3; // localDateTimeProperty
         private com.example.ItemProperty2.Parser comExampleItemProperty2Parser;
 
         @Override
@@ -84,6 +87,13 @@ public class Item {
                                     objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
                                 }
                                 break;
+                            case "localDateTimeProperty":
+                                if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
+                                    ParserUtils.assertToken(JsonToken.VALUE_STRING, token, jsonParser);
+                                    this.p3 = java.time.LocalDateTime.parse(jsonParser.getText());
+                                    objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
+                                }
+                                break;
                         }
                         break;
                 }
@@ -94,7 +104,7 @@ public class Item {
         @Override
         public com.example.Item build() {
             if (objectParserState == ObjectParserState.FINISHED) {
-                return new com.example.Item(this.p0, this.p1, this.p2);
+                return new com.example.Item(this.p0, this.p1, this.p2, this.p3);
             } else {
                 throw new IllegalStateException("Parsing is not completed");
             }
@@ -119,6 +129,10 @@ public class Item {
             if (value.decimalProperty != null) {
                 jsonGenerator.writeFieldName("decimalProperty");
                 jsonGenerator.writeNumber(value.decimalProperty);
+            }
+            if (value.localDateTimeProperty != null) {
+                jsonGenerator.writeFieldName("localDateTimeProperty");
+                jsonGenerator.writeString(value.localDateTimeProperty.toString());
             }
             jsonGenerator.writeEndObject();
         }

@@ -1,16 +1,24 @@
 package jsm.java.jackson
 
+import jsm.JsonSchema
 import jsm.JsonType
+import jsm.LOCAL_DATE_TIME_FORMAT
 import jsm.indentWithMargin
 import jsm.java.ExtraMemberWriter
 import jsm.java.JavaProperty
 import jsm.java.toVariableName
 import java.util.*
 
-val jacksonScalarReadMethods = mapOf(
-        JsonType.STRING to "getText",
-        JsonType.NUMBER to "getDecimalValue"
-)
+fun scalarReadMethod(jsonSchema: JsonSchema): String {
+    return when (val type = jsonSchema.type) {
+        JsonType.STRING -> when (jsonSchema.format) {
+            LOCAL_DATE_TIME_FORMAT -> "java.time.LocalDateTime.parse(jsonParser.getText())"
+            else -> "jsonParser.getText()"
+        }
+        JsonType.NUMBER -> "jsonParser.getDecimalValue()"
+        else -> error("Unsupported type $type")
+    }
+}
 
 class JacksonParserWriter : ExtraMemberWriter {
     override fun write(
@@ -57,12 +65,11 @@ class JacksonParserWriter : ExtraMemberWriter {
         val parseValueCases = javaProperties.map { javaProperty ->
             val jsonType = javaProperty.jsonSchema.type
             if (jsonType.scalar) {
-                val jacksonValueMethod = jacksonScalarReadMethods[jsonType]
-                        ?: error("Can't find value method for $jsonType")
+                val jacksonValueMethod = scalarReadMethod(javaProperty.jsonSchema)
                 """|case "${javaProperty.name}":
                    |    if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
                    |        ParserUtils.assertToken(JsonToken.VALUE_STRING, token, jsonParser);
-                   |        this.${javaProperty.internalVariableName} = jsonParser.$jacksonValueMethod();
+                   |        this.${javaProperty.internalVariableName} = $jacksonValueMethod;
                    |        objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
                    |    }
                    |    break;

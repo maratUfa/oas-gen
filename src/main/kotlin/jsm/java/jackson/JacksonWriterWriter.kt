@@ -1,14 +1,22 @@
 package jsm.java.jackson
 
+import jsm.JsonSchema
 import jsm.JsonType
+import jsm.LOCAL_DATE_TIME_FORMAT
 import jsm.indentWithMargin
 import jsm.java.ExtraMemberWriter
 import jsm.java.JavaProperty
 
-val jacksonScalarWriteMethods = mapOf(
-        JsonType.STRING to "writeString",
-        JsonType.NUMBER to "writeNumber"
-)
+fun scalarWriteMethod(jsonSchema: JsonSchema, property: String): String {
+    return when (val type = jsonSchema.type) {
+        JsonType.STRING -> when (jsonSchema.format) {
+            LOCAL_DATE_TIME_FORMAT -> "jsonGenerator.writeString(value.$property.toString())"
+            else -> "jsonGenerator.writeString(value.$property)"
+        }
+        JsonType.NUMBER -> "jsonGenerator.writeNumber(value.$property)"
+        else -> error("Unsupported type $type")
+    }
+}
 
 class JacksonWriterWriter : ExtraMemberWriter {
     override fun write(
@@ -22,9 +30,8 @@ class JacksonWriterWriter : ExtraMemberWriter {
             val jsonType = javaProperty.jsonSchema.type
 
             val writeExpression = if (javaProperty.jsonSchema.type.scalar) {
-                val writeMethod = jacksonScalarWriteMethods[jsonType]
-                        ?: error("Can't find write method for $jsonType")
-                "jsonGenerator.$writeMethod(value.${javaProperty.variableName});"
+                val writeMethod = scalarWriteMethod(javaProperty.jsonSchema, javaProperty.variableName)
+                "$writeMethod;"
             } else {
                 "${javaProperty.type}.Writer.INSTANCE.write(jsonGenerator, value.${javaProperty.variableName});"
             }

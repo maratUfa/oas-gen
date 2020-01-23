@@ -51,3 +51,6 @@ components:
               type: string
         decimalProperty:
           type: number
+        localDateTimeProperty:
+          type: string
+          format: local-date-time
