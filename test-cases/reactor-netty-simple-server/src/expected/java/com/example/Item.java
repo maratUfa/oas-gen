@@ -62,7 +62,7 @@ public class Item {
                             case "property1":
                                 if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
                                     ParserUtils.assertToken(JsonToken.VALUE_STRING, token, jsonParser);
-                                    this.p0 = jsonParser.getValueAsString();
+                                    this.p0 = jsonParser.getText();
                                     objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
                                 }
                                 break;

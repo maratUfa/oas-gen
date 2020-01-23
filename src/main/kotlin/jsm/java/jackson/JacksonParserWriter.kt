@@ -8,7 +8,7 @@ import jsm.java.toVariableName
 import java.util.*
 
 val jacksonScalarReadMethods = mapOf(
-        JsonType.STRING to "getValueAsString"
+        JsonType.STRING to "getText"
 )
 
 class JacksonParserWriter : ExtraMemberWriter {
