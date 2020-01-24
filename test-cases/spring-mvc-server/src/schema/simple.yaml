@@ -54,3 +54,7 @@ components:
         localDateTimeProperty:
           type: string
           format: local-date-time
+        stringArrayProperty:
+          type: array
+          items:
+            type: string

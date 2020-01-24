@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
+
+import jsm.ParseResult;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -85,7 +87,12 @@ public class SimpleWebMvcConfiguration extends WebMvcConfigurationSupport {
                     jsonParser.feedInput(buffer, 0, read);
                     parser.parseNext(jsonParser);
                 }
-                return parser.build();
+                ParseResult<Item> parseResult = parser.build();
+                if (parseResult == ParseResult.NULL_VALUE) {
+                    return null;
+                } else {
+                    return parseResult.getValue();
+                }
             }
 
             @Override

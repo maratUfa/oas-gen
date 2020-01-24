@@ -1,9 +1,6 @@
 package jsm.java
 
-import jsm.JsonSchema
-import jsm.JsonType
-import jsm.LOCAL_DATE_TIME_FORMAT
-import jsm.TypedFragment
+import jsm.*
 
 fun toType(basePackage: String, schema: JsonSchema): String {
     return when (val jsonType = schema.type) {
@@ -13,7 +10,7 @@ fun toType(basePackage: String, schema: JsonSchema): String {
         }
         JsonType.NUMBER -> "java.math.BigDecimal"
         JsonType.BOOLEAN -> "Boolean"
-        JsonType.ARRAY -> "List<${toType(basePackage, schema.items() ?: error("there is not items for schema $schema"))}>"
+        JsonType.ARRAY -> "java.util.List<${toType(basePackage, schema.items() ?: error("there is not items for schema $schema"))}>"
         JsonType.OBJECT -> toClassName(basePackage, schema)
         else -> error("unknown type '$jsonType' in $schema")
     }

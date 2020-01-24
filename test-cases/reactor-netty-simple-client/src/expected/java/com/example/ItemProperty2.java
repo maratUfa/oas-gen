@@ -12,7 +12,7 @@ public class ItemProperty2 {
 
     public static class Parser implements NonBlockingParser<com.example.ItemProperty2> {
 
-        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT;
+        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL;
         private String currentField;
         private String p0; // property21
         private String p1; // property22
@@ -23,7 +23,7 @@ public class ItemProperty2 {
             while (jsonParser.currentToken() == null || jsonParser.currentToken() != JsonToken.NOT_AVAILABLE) {
                 JsonToken token;
                 switch (objectParserState) {
-                    case PARSE_START_OBJECT:
+                    case PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL:
                         if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
                             ParserUtils.assertToken(JsonToken.START_OBJECT, token, jsonParser);
                             objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
@@ -38,7 +38,7 @@ public class ItemProperty2 {
 
                                     break;
                                 case END_OBJECT:
-                                    objectParserState = ObjectParserState.FINISHED;
+                                    objectParserState = ObjectParserState.FINISHED_VALUE;
                                     return true;
                                 default:
                                     throw new RuntimeException("Unexpected token " + token);

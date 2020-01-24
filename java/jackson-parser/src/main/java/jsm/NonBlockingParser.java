@@ -6,5 +6,6 @@ import java.io.IOException;
 
 public interface NonBlockingParser<T> {
      boolean parseNext(NonBlockingJsonParser jsonParser) throws IOException;
-     T build();
+     ParseResult<T> build();
+     void reset();
 }

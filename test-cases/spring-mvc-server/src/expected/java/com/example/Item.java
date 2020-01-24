@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.json.async.NonBlockingJsonParser;
 import java.io.IOException;
 import jsm.NonBlockingParser;
 import jsm.ObjectParserState;
+import jsm.ParseResult;
 import jsm.ParserUtils;
 
 public class Item {
@@ -14,22 +15,25 @@ public class Item {
     public final com.example.ItemProperty2 property2;
     public final java.math.BigDecimal decimalProperty;
     public final java.time.LocalDateTime localDateTimeProperty;
+    public final java.util.List<String> stringArrayProperty;
 
-    public Item(String property1, com.example.ItemProperty2 property2, java.math.BigDecimal decimalProperty, java.time.LocalDateTime localDateTimeProperty) {
+    public Item(String property1, com.example.ItemProperty2 property2, java.math.BigDecimal decimalProperty, java.time.LocalDateTime localDateTimeProperty, java.util.List<String> stringArrayProperty) {
         this.property1 = property1;
         this.property2 = property2;
         this.decimalProperty = decimalProperty;
         this.localDateTimeProperty = localDateTimeProperty;
+        this.stringArrayProperty = stringArrayProperty;
     }
 
     public static class Parser implements NonBlockingParser<com.example.Item> {
 
-        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT;
+        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL;
         private String currentField;
         private String p0; // property1
         private com.example.ItemProperty2 p1; // property2
         private java.math.BigDecimal p2; // decimalProperty
         private java.time.LocalDateTime p3; // localDateTimeProperty
+        private java.util.List<String> p4; // stringArrayProperty
         private com.example.ItemProperty2.Parser comExampleItemProperty2Parser;
 
         @Override
@@ -37,10 +41,21 @@ public class Item {
             while (jsonParser.currentToken() == null || jsonParser.currentToken() != JsonToken.NOT_AVAILABLE) {
                 JsonToken token;
                 switch (objectParserState) {
-                    case PARSE_START_OBJECT:
+                    case PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL:
                         if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
-                            ParserUtils.assertToken(JsonToken.START_OBJECT, token, jsonParser);
-                            objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
+                            switch (token) {
+                                case START_OBJECT:
+                                    objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
+                                    break;
+                                case END_ARRAY:
+                                    objectParserState = ObjectParserState.FINISHED_ARRAY;
+                                    return true;
+                                case VALUE_NULL:
+                                    objectParserState = ObjectParserState.FINISHED_NULL;
+                                    return true;
+                                default:
+                                    throw new RuntimeException("Unexpected token " + token);
+                            }
                         }
                         break;
                     case PARSE_FIELD_NAME_OR_END_OBJECT:
@@ -56,7 +71,7 @@ public class Item {
                                     }
                                     break;
                                 case END_OBJECT:
-                                    objectParserState = ObjectParserState.FINISHED;
+                                    objectParserState = ObjectParserState.FINISHED_VALUE;
                                     return true;
                                 default:
                                     throw new RuntimeException("Unexpected token " + token);
@@ -73,8 +88,7 @@ public class Item {
                                 }
                                 break;
                             case "property2":
-                                boolean done = comExampleItemProperty2Parser.parseNext(jsonParser);
-                                if (done) {
+                                if (comExampleItemProperty2Parser.parseNext(jsonParser)) {
                                     p1 = comExampleItemProperty2Parser.build();
                                     comExampleItemProperty2Parser = null;
                                     objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
@@ -94,6 +108,14 @@ public class Item {
                                     objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
                                 }
                                 break;
+                            case "stringArrayProperty":
+                                boolean done = comExampleItemProperty2Parser.parseNext(jsonParser);
+                                if (done) {
+                                    p1 = comExampleItemProperty2Parser.build();
+                                    comExampleItemProperty2Parser = null;
+                                    objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
+                                }
+                                break;
                         }
                         break;
                 }
@@ -102,12 +124,26 @@ public class Item {
         }
 
         @Override
-        public com.example.Item build() {
-            if (objectParserState == ObjectParserState.FINISHED) {
-                return new com.example.Item(this.p0, this.p1, this.p2, this.p3);
-            } else {
-                throw new IllegalStateException("Parsing is not completed");
+        public ParseResult<com.example.Item> build() {
+            switch (objectParserState) {
+                case FINISHED_VALUE:
+                    return new ParseResult.Value<>(new Item(this.p0, this.p1, this.p2, this.p3, this.p4));
+                case FINISHED_ARRAY:
+                    return ParseResult.endArray();
+                case FINISHED_NULL:
+                    return ParseResult.nullValue();
+                default:
+                    throw new IllegalStateException("Parsing is not completed");
             }
+        }
+
+        @Override
+        public void reset() {
+            this.p0 = null;
+            this.p1 = null;
+            this.p2 = null;
+            this.p3 = null;
+            this.p4 = null;
         }
 
     }

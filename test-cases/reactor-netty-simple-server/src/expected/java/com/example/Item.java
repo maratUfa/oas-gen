@@ -20,7 +20,7 @@ public class Item {
 
     public static class Parser implements NonBlockingParser<com.example.Item> {
 
-        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT;
+        private ObjectParserState objectParserState = ObjectParserState.PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL;
         private String currentField;
         private String p0; // property1
         private com.example.ItemProperty2 p1; // property2
@@ -31,7 +31,7 @@ public class Item {
             while (jsonParser.currentToken() == null || jsonParser.currentToken() != JsonToken.NOT_AVAILABLE) {
                 JsonToken token;
                 switch (objectParserState) {
-                    case PARSE_START_OBJECT:
+                    case PARSE_START_OBJECT_OR_END_ARRAY_OR_NULL:
                         if ((token = jsonParser.nextToken()) != JsonToken.NOT_AVAILABLE) {
                             ParserUtils.assertToken(JsonToken.START_OBJECT, token, jsonParser);
                             objectParserState = ObjectParserState.PARSE_FIELD_NAME_OR_END_OBJECT;
@@ -50,7 +50,7 @@ public class Item {
                                     }
                                     break;
                                 case END_OBJECT:
-                                    objectParserState = ObjectParserState.FINISHED;
+                                    objectParserState = ObjectParserState.FINISHED_VALUE;
                                     return true;
                                 default:
                                     throw new RuntimeException("Unexpected token " + token);
@@ -83,7 +83,7 @@ public class Item {
 
         @Override
         public com.example.Item build() {
-            if (objectParserState == ObjectParserState.FINISHED) {
+            if (objectParserState == ObjectParserState.FINISHED_VALUE) {
                 return new com.example.Item(this.p0, this.p1);
             } else {
                 throw new IllegalStateException("Parsing is not completed");
