@@ -3,6 +3,7 @@ package jsm.typescript.axios
 import jsm.*
 import jsm.java.toLowerCamelCase
 import jsm.typescript.*
+import java.io.File
 import java.lang.StringBuilder
 
 private fun axiosMethod(operationType: OperationType) = when (operationType) {
@@ -80,7 +81,7 @@ class AxiosClientWriter(val basePackage: String) : Writer<OpenApiSchema> {
                     )
                 }
             }
-            val schemaFileName = openApiSchema.fragment.reference.filePath.split("/").last()
+            val schemaFileName = openApiSchema.fragment.reference.filePath.split(File.separator).last()
             val schemaName = schemaFileName.substring(0, schemaFileName.lastIndexOf('.'))
             val outputFileName = "${toLowerCamelCase(schemaName)}.ts"
 

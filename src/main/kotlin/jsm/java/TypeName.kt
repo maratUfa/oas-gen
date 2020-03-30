@@ -1,6 +1,7 @@
 package jsm.java
 
 import jsm.*
+import java.io.File
 
 fun toJavaClassName(basePackage: String, typedFragment: TypedFragment, suffix: String? = null): String {
     val typeName = toTypeName(typedFragment, suffix)
@@ -21,7 +22,7 @@ fun toTypeName(typedFragment: TypedFragment, suffix: String? = null): TypeName {
     do {
         val fragmentReference = currentFragment.fragment.reference
         if (fragmentReference.fragmentPath.isEmpty()) {
-            val lastName = fragmentReference.filePath.split("/").last()
+            val lastName = fragmentReference.filePath.split(File.separator).last()
             val dotIndex = lastName.indexOf('.')
             val namePart = if (dotIndex == -1) lastName else lastName.substring(0, dotIndex)
             nameParts.add(namePart)
@@ -44,7 +45,7 @@ fun toTypeName(typedFragment: TypedFragment, suffix: String? = null): TypeName {
 
     nameParts.reverse()
     val simpleName = toUpperCamelCase(*(nameParts + suffix).filterNotNull().toTypedArray())
-    val pathComponents = typedFragment.fragment.reference.filePath.split('/')
+    val pathComponents = typedFragment.fragment.reference.filePath.split(File.separator)
     val namespace = toNamespace(pathComponents)
     return TypeName(namespace, simpleName)
 }
@@ -116,7 +117,7 @@ fun toCamelCase(firstUpper: Boolean, vararg parts: String): String {
 }
 
 fun getFilePath(className: String): String {
-    return "${className.replace('.', '/')}.java"
+    return "${className.replace('.', File.separatorChar)}.java"
 }
 
 fun getPackage(className: String): String {

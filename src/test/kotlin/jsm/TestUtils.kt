@@ -10,6 +10,7 @@ import org.eclipse.jgit.lib.TreeFormatter
 import org.eclipse.jgit.revwalk.RevWalk
 import org.junit.jupiter.api.Assertions.fail
 import java.io.ByteArrayOutputStream
+import java.io.File
 
 sealed class FileTreeNode
 
@@ -17,7 +18,7 @@ class FileNode(val content: String) : FileTreeNode()
 
 class DirectoryNode(val children: MutableMap<String, FileTreeNode>) : FileTreeNode() {
     fun addFile(path: String, content: String) {
-        addFile(path.split("/"), content)
+        addFile(path.split(File.separator), content)
     }
 
     private fun addFile(path: List<String>, content: String) {
@@ -48,7 +49,9 @@ class TreeConverter(private val inserter: ObjectInserter, private val revWalk: R
         directoryNode.children.forEach { (name, child) ->
             when (child) {
                 is FileNode -> {
-                    val fileBlobId = inserter.insert(OBJ_BLOB, child.content.toByteArray())
+                    val fileBlobId = inserter.insert(OBJ_BLOB, child.content
+                            .replace("\r\n", "\n")
+                            .toByteArray())
                     treeFormatter.append(name, revWalk.lookupBlob(fileBlobId))
                 }
                 is DirectoryNode -> {
